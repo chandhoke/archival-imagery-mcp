@@ -1,0 +1,51 @@
+{
+  "name": "archival-imagery-mcp",
+  "version": "0.2.0",
+  "description": "MCP server for browsing and downloading open-licensed imagery from Wellcome Collection, Met Museum, Library of Congress, Rijksmuseum, Smithsonian Open Access, and Europeana. For editorial projects that need authored archival material instead of AI-generated stock.",
+  "type": "module",
+  "bin": {
+    "archival-imagery-mcp": "./index.mjs"
+  },
+  "main": "index.mjs",
+  "files": [
+    "index.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node index.mjs",
+    "test": "echo '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\",\"params\":{}}' | node index.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "archival",
+    "imagery",
+    "open-access",
+    "public-domain",
+    "wellcome-collection",
+    "met-museum",
+    "library-of-congress",
+    "rijksmuseum",
+    "smithsonian",
+    "europeana",
+    "claude",
+    "anthropic"
+  ],
+  "author": "Harpreet Chandhoke",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chandhoke/archival-imagery-mcp.git"
+  },
+  "homepage": "https://github.com/chandhoke/archival-imagery-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/chandhoke/archival-imagery-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
