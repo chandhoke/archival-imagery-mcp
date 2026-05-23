@@ -19,9 +19,10 @@ This server gives the assistant a different option: search the world's open-acce
 | **Wellcome Collection** | UK. Medical, scientific, esoteric, astrological history. ~250k items. | No | CC-BY / PDM |
 | **Met Museum** | US. Open Access program. ~470k objects, all CC0 when public domain. | No | CC0 |
 | **Library of Congress** | US. Photos, manuscripts, maps, prints, newspapers, film. ~1M items. | No | Mostly PD |
-| **Rijksmuseum** | NL. Everything pre-1900 is Public Domain. Excellent for European art history. | Free | PD post-1900 |
 | **Smithsonian Open Access** | US. 4.5M+ CC0 items across 21 museums. | Free | CC0 |
-| **Europeana** | EU aggregator — British Library, Louvre, Rijksmuseum, plus 4000+ institutions. | Free | Mixed (filterable) |
+| **Europeana** | EU aggregator — British Library, Louvre, **full Rijksmuseum collection**, plus 4000+ institutions. | Free | Mixed (filterable) |
+
+> **Note on Rijksmuseum:** the Rijksmuseum's REST API was deprecated in 2024 in favour of OAI-PMH (an XML harvesting protocol designed for institutional bulk-download, not query-by-keyword). Rather than re-implement on a less query-friendly protocol, this server intentionally omits direct Rijksmuseum support. Europeana fully indexes the Rijksmuseum collection — query it via `europeana_search` with `provider="Rijksmuseum"`.
 
 ## Installation
 
@@ -43,7 +44,6 @@ Then add to your MCP client's config. For **Claude Code Desktop** (`~/.claude.js
       "command": "node",
       "args": ["/absolute/path/to/archival-imagery-mcp/index.mjs"],
       "env": {
-        "RIJKSMUSEUM_API_KEY": "your-key-here-or-omit",
         "SMITHSONIAN_API_KEY": "your-key-here-or-omit",
         "EUROPEANA_API_KEY": "your-key-here-or-omit"
       }
@@ -52,7 +52,7 @@ Then add to your MCP client's config. For **Claude Code Desktop** (`~/.claude.js
 }
 ```
 
-API keys are **all optional** — Wellcome, Met, and Library of Congress work without keys. Tools for the other three return a helpful error message with the signup URL if their key is missing.
+API keys are **all optional** — Wellcome, Met, and Library of Congress work without keys. Smithsonian and Europeana tools return a helpful error message with the signup URL if their key is missing.
 
 ### From npm (coming soon)
 
@@ -62,11 +62,10 @@ A future release will be published to npm so you can install with `npm install -
 
 All free, all take under 2 minutes:
 
-- **Rijksmuseum:** [data.rijksmuseum.nl/object-metadata/api/](https://data.rijksmuseum.nl/object-metadata/api/) — instant
-- **Smithsonian:** [api.data.gov/signup/](https://api.data.gov/signup/) — email confirmation
-- **Europeana:** [pro.europeana.eu/page/get-api](https://pro.europeana.eu/page/get-api) — instant
+- **Smithsonian:** [api.data.gov/signup/](https://api.data.gov/signup/) — email confirmation. The same key works for NASA, NOAA, FCC, and most US government APIs.
+- **Europeana:** [pro.europeana.eu/page/get-api](https://pro.europeana.eu/page/get-api) — instant. Covers British Library, Rijksmuseum, Louvre, and 4000+ other institutions in one endpoint.
 
-## Tools (14 total)
+## Tools (12 total)
 
 ### Search & retrieval
 
@@ -79,8 +78,6 @@ All free, all take under 2 minutes:
 | `met_get_object` | Met | — |
 | `loc_search` | Library of Congress | — |
 | `loc_get_item` | Library of Congress | — |
-| `rijks_search` | Rijksmuseum | ✓ |
-| `rijks_get_object` | Rijksmuseum | ✓ |
 | `smithsonian_search` | Smithsonian | ✓ |
 | `smithsonian_get_object` | Smithsonian | ✓ |
 | `europeana_search` | Europeana | ✓ |
@@ -100,7 +97,7 @@ Once installed, just describe what you want and the assistant picks the right to
 
 > *"Search Wellcome for nakshatra diagrams and save the best two to my project's public/brand/ folder."*
 
-> *"What does the Rijksmuseum have on Vermeer? I want a portrait for the about page."*
+> *"Use Europeana with provider='Rijksmuseum' to find Vermeer paintings — I want a portrait for the about page."*
 
 > *"Use Europeana to find anything from the British Library tagged 'Sanskrit manuscript' — only CC0/CC-BY please."*
 

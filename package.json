@@ -1,7 +1,7 @@
 {
   "name": "archival-imagery-mcp",
-  "version": "0.2.0",
-  "description": "MCP server for browsing and downloading open-licensed imagery from Wellcome Collection, Met Museum, Library of Congress, Rijksmuseum, Smithsonian Open Access, and Europeana. For editorial projects that need authored archival material instead of AI-generated stock.",
+  "version": "0.2.1",
+  "description": "MCP server for browsing and downloading open-licensed imagery from Wellcome Collection, Met Museum, Library of Congress, Smithsonian Open Access, and Europeana (which fully indexes Rijksmuseum + 4000 other institutions). For editorial projects that need authored archival material instead of AI-generated stock.",
   "type": "module",
   "bin": {
     "archival-imagery-mcp": "./index.mjs"
@@ -26,7 +26,6 @@
     "wellcome-collection",
     "met-museum",
     "library-of-congress",
-    "rijksmuseum",
     "smithsonian",
     "europeana",
     "claude",

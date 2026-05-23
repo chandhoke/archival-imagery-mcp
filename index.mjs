@@ -8,24 +8,25 @@
  * stock.
  *
  * Sources (alphabetical):
- *   - Europeana             (50+ EU institutions inc. British Library)  key
+ *   - Europeana             (50+ EU institutions inc. British Library
+ *                            and full Rijksmuseum coverage)             key
  *   - Library of Congress   (US, prints/photographs/manuscripts)        no key
  *   - Met Museum            (US, Open Access = CC0)                     no key
- *   - Rijksmuseum           (NL, PD post-1900)                          key
  *   - Smithsonian Open Acc. (US, 4.5M+ CC0 items)                       key
  *   - Wellcome Collection   (UK, mostly CC-BY and PDM)                  no key
  *
- * Tools (14 total):
+ * Tools (12 total):
  *   wellcome_search, wellcome_get_work, wellcome_image_url
  *   met_search, met_get_object
  *   loc_search, loc_get_item
- *   rijks_search, rijks_get_object
  *   smithsonian_search, smithsonian_get_object
  *   europeana_search, europeana_get_record
  *   download_image                          (shared, works on any URL)
  *
+ * Rijksmuseum's REST API was deprecated in 2024 in favour of OAI-PMH; use
+ * europeana_search with provider='Rijksmuseum' to access their collection.
+ *
  * API keys (read from env vars; tools return a helpful error if missing):
- *   RIJKSMUSEUM_API_KEY     https://data.rijksmuseum.nl/object-metadata/api/
  *   SMITHSONIAN_API_KEY     https://api.data.gov/signup/
  *   EUROPEANA_API_KEY       https://pro.europeana.eu/page/get-api
  *
@@ -43,7 +44,7 @@ import { dirname } from "node:path";
 
 // ---------- shared ----------
 
-const UA = "archival-imagery-mcp/0.2";
+const UA = "archival-imagery-mcp/0.2.1";
 
 async function fetchJSON(url, init = {}) {
   const res = await fetch(url, {
@@ -255,56 +256,11 @@ async function locGetItem({ itemUrl }) {
   };
 }
 
-// =========================================================================
-// RIJKSMUSEUM (needs RIJKSMUSEUM_API_KEY)
-// =========================================================================
-
-const RIJKS_BASE = "https://www.rijksmuseum.nl/api/en";
-const RIJKS_SIGNUP = "https://data.rijksmuseum.nl/object-metadata/api/";
-
-async function rijksSearch({ query, pageSize = 10, imgOnly = true }) {
-  const key = requireKey("RIJKSMUSEUM_API_KEY", RIJKS_SIGNUP);
-  const params = new URLSearchParams({
-    key,
-    q: query,
-    ps: String(pageSize),
-    imgonly: String(imgOnly),
-  });
-  const data = await fetchJSON(`${RIJKS_BASE}/collection?${params.toString()}`);
-  return {
-    source: "rijksmuseum",
-    totalResults: data.count,
-    showing: (data.artObjects || []).length,
-    results: (data.artObjects || []).map((o) => ({
-      objectNumber: o.objectNumber,
-      title: o.title,
-      principalOrFirstMaker: o.principalOrFirstMaker,
-      longTitle: o.longTitle,
-      webImage: o.webImage?.url,
-      headerImage: o.headerImage?.url,
-      productionPlaces: o.productionPlaces,
-    })),
-  };
-}
-
-async function rijksGetObject({ objectNumber }) {
-  const key = requireKey("RIJKSMUSEUM_API_KEY", RIJKS_SIGNUP);
-  const data = await fetchJSON(`${RIJKS_BASE}/collection/${encodeURIComponent(objectNumber)}?key=${key}`);
-  const o = data.artObject || {};
-  return {
-    source: "rijksmuseum",
-    objectNumber: o.objectNumber,
-    title: o.title,
-    description: o.description || o.label?.description,
-    principalMakers: o.principalMakers,
-    dating: o.dating?.presentingDate,
-    materials: o.materials,
-    techniques: o.techniques,
-    dimensions: o.subTitle,
-    webImage: o.webImage?.url,
-    classification: o.classification,
-  };
-}
+// NOTE: Rijksmuseum's REST API was deprecated in 2024 in favour of OAI-PMH
+// (an XML-based harvesting protocol). Rather than re-implement on a less
+// query-friendly protocol, this server intentionally omits direct
+// Rijksmuseum support. Use europeana_search with provider='Rijksmuseum' —
+// Europeana fully indexes the Rijksmuseum collection.
 
 // =========================================================================
 // SMITHSONIAN OPEN ACCESS (needs SMITHSONIAN_API_KEY from data.gov)
@@ -517,25 +473,6 @@ const TOOLS = [
     description: "Fetch a Library of Congress item by full URL (e.g. 'https://www.loc.gov/item/2003663891/'). Returns metadata and all image file URLs.",
     inputSchema: { type: "object", properties: { itemUrl: { type: "string" } }, required: ["itemUrl"] },
   },
-  // ---- Rijksmuseum ----
-  {
-    name: "rijks_search",
-    description: "Search the Rijksmuseum (NL). All collection items post-1900 are Public Domain. Requires RIJKSMUSEUM_API_KEY env var (free, sign up at data.rijksmuseum.nl).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        query: { type: "string" },
-        pageSize: { type: "number", default: 10 },
-        imgOnly: { type: "boolean", default: true },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    name: "rijks_get_object",
-    description: "Fetch a Rijksmuseum object by objectNumber (e.g. 'SK-C-5' = The Night Watch). Requires RIJKSMUSEUM_API_KEY.",
-    inputSchema: { type: "object", properties: { objectNumber: { type: "string" } }, required: ["objectNumber"] },
-  },
   // ---- Smithsonian ----
   {
     name: "smithsonian_search",
@@ -598,8 +535,6 @@ const HANDLERS = {
   met_get_object: metGetObject,
   loc_search: locSearch,
   loc_get_item: locGetItem,
-  rijks_search: rijksSearch,
-  rijks_get_object: rijksGetObject,
   smithsonian_search: smithsonianSearch,
   smithsonian_get_object: smithsonianGetObject,
   europeana_search: europeanaSearch,
@@ -608,7 +543,7 @@ const HANDLERS = {
 };
 
 const server = new Server(
-  { name: "archival-imagery", version: "0.2.0" },
+  { name: "archival-imagery", version: "0.2.1" },
   { capabilities: { tools: {} } },
 );
 
@@ -633,4 +568,4 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error("archival-imagery-mcp v0.2 ready on stdio");
+console.error("archival-imagery-mcp v0.2.1 ready on stdio");
