@@ -26,23 +26,17 @@ This server gives the assistant a different option: search the world's open-acce
 
 ## Installation
 
-### From source (current method)
+### From npm (recommended)
 
-```bash
-git clone https://github.com/chandhoke/archival-imagery-mcp.git
-cd archival-imagery-mcp
-npm install
-```
-
-Then add to your MCP client's config. For **Claude Code Desktop** (`~/.claude.json` or `%USERPROFILE%\.claude.json`):
+No install step needed if you have Node 18+ — just point your MCP client at `npx`:
 
 ```json
 {
   "mcpServers": {
     "archival-imagery": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/absolute/path/to/archival-imagery-mcp/index.mjs"],
+      "command": "npx",
+      "args": ["-y", "archival-imagery-mcp"],
       "env": {
         "SMITHSONIAN_API_KEY": "your-key-here-or-omit",
         "EUROPEANA_API_KEY": "your-key-here-or-omit"
@@ -52,11 +46,37 @@ Then add to your MCP client's config. For **Claude Code Desktop** (`~/.claude.js
 }
 ```
 
+Or install once globally:
+
+```bash
+npm install -g archival-imagery-mcp
+```
+
+Then use `"command": "archival-imagery-mcp"` (no args needed) in your config.
+
 API keys are **all optional** — Wellcome, Met, and Library of Congress work without keys. Smithsonian and Europeana tools return a helpful error message with the signup URL if their key is missing.
 
-### From npm (coming soon)
+### From source (for development / custom builds)
 
-A future release will be published to npm so you can install with `npm install -g archival-imagery-mcp` and point the config at `npx archival-imagery-mcp`. For now, install from source above.
+```bash
+git clone https://github.com/chandhoke/archival-imagery-mcp.git
+cd archival-imagery-mcp
+npm install
+```
+
+Then point your MCP config at the local path:
+
+```json
+{
+  "mcpServers": {
+    "archival-imagery": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/absolute/path/to/archival-imagery-mcp/index.mjs"]
+    }
+  }
+}
+```
 
 ## Getting the optional API keys
 
